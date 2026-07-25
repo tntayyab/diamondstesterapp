@@ -1,0 +1,41 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_ENABLE_DEMO_FALLBACK": "1"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://szdrooxgqbcsgokusfgy.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_TEladWDFhpW68YDxtRmNcw_q_rjD1R7",
+        "EXPO_PUBLIC_IDENTIFY_FUNCTION": "identify-diamond",
+        "EXPO_PUBLIC_AI_MODEL_FREE": "claude-haiku-4-5",
+        "EXPO_PUBLIC_AI_MODEL_PRO": "claude-sonnet-4-6",
+        "EXPO_PUBLIC_SITE_URL": "https://diamondstester.com",
+        "EXPO_PUBLIC_SUPPORT_EMAIL": "chaos.and.lovefam@gmail.com",
+        "EXPO_PUBLIC_CREDITS_PER_SCAN": "10",
+        "EXPO_PUBLIC_GUEST_FREE_SCANS": "2",
+        "EXPO_PUBLIC_ENABLE_DEMO_FALLBACK": "1"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": { "buildType": "app-bundle" },
+      "env": {
+        "EXPO_PUBLIC_ENABLE_DEMO_FALLBACK": "0"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

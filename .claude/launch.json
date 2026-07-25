@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "dist", "-l", "8090", "-s"],
+      "port": 8090
+    }
+  ]
+}

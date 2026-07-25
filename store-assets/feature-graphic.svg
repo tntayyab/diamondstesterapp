@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e1b15"/>
+      <stop offset="0.55" stop-color="#0a130f"/>
+      <stop offset="1" stop-color="#050907"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#10b981" stop-opacity="0.45"/>
+      <stop offset="0.6" stop-color="#10b981" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#34d399" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#34d399" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#34d399" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="body" cx="0.5" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#22392e"/>
+      <stop offset="1" stop-color="#0b1510"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <ellipse cx="815" cy="250" rx="300" ry="250" fill="url(#glow)"/>
+
+  <!-- spider web backdrop -->
+  <g stroke="#34d399" stroke-opacity="0.14" stroke-width="1.5" fill="none">
+    <line x1="815" y1="250" x2="1030" y2="250"/>
+    <line x1="815" y1="250" x2="965" y2="405"/>
+    <line x1="815" y1="250" x2="815" y2="470"/>
+    <line x1="815" y1="250" x2="665" y2="405"/>
+    <line x1="815" y1="250" x2="600" y2="250"/>
+    <line x1="815" y1="250" x2="665" y2="95"/>
+    <line x1="815" y1="250" x2="815" y2="30"/>
+    <line x1="815" y1="250" x2="965" y2="95"/>
+    <polygon points="895,250 872,307 815,330 758,307 735,250 758,193 815,170 872,193"/>
+    <polygon points="965,250 921,356 815,400 709,356 665,250 709,144 815,100 921,144"/>
+  </g>
+
+  <!-- camera viewfinder -->
+  <g stroke="#10b981" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M675,120 L648,120 L648,150"/>
+    <path d="M955,120 L982,120 L982,150"/>
+    <path d="M675,380 L648,380 L648,350"/>
+    <path d="M955,380 L982,380 L982,350"/>
+  </g>
+  <rect x="648" y="243" width="334" height="16" fill="url(#scan)"/>
+  <rect x="648" y="250" width="334" height="2" fill="#6ee7b7" opacity="0.85"/>
+
+  <!-- spider -->
+  <g stroke="#34d399" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M808,214 C772,196 735,176 712,146"/>
+    <path d="M802,230 C752,218 712,214 686,200"/>
+    <path d="M802,256 C742,258 704,270 682,270"/>
+    <path d="M806,280 C762,300 728,326 712,354"/>
+    <path d="M822,214 C858,196 895,176 918,146"/>
+    <path d="M828,230 C878,218 918,214 944,200"/>
+    <path d="M828,256 C888,258 926,270 948,270"/>
+    <path d="M824,280 C868,300 902,326 918,354"/>
+  </g>
+  <ellipse cx="815" cy="300" rx="46" ry="60" fill="url(#body)" stroke="#10b981" stroke-width="2.5"/>
+  <ellipse cx="815" cy="220" rx="30" ry="27" fill="url(#body)" stroke="#10b981" stroke-width="2.5"/>
+  <path d="M815,265 L806,300 L815,320 L824,300 Z" fill="#10b981" opacity="0.6"/>
+  <circle cx="815" cy="335" r="5" fill="#10b981" opacity="0.5"/>
+  <circle cx="808" cy="206" r="3.2" fill="#6ee7b7"/>
+  <circle cx="822" cy="206" r="3.2" fill="#6ee7b7"/>
+  <path d="M808,244 L804,256 M822,244 L826,256" stroke="#34d399" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- text -->
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="72" y="96" width="286" height="34" rx="17" fill="#10b981" fill-opacity="0.08" stroke="#10b981" stroke-width="1.5"/>
+    <circle cx="94" cy="113" r="4" fill="#34d399"/>
+    <text x="110" y="118" font-size="13" letter-spacing="1.8" font-weight="700" fill="#6ee7b7">AI SPIDER IDENTIFICATION</text>
+
+    <text x="68" y="224" font-size="78" font-weight="800" fill="#ffffff">Spider</text>
+    <text x="68" y="300" font-size="78" font-weight="800" fill="#34d399">Identifier</text>
+
+    <text x="72" y="350" font-size="23" font-weight="500" fill="#c7d6d0">Identify any spider from a photo — instantly.</text>
+    <text x="72" y="394" font-size="18" font-weight="600" fill="#8aa79c">Snap a photo  ·  AI identifies  ·  Learn the species</text>
+  </g>
+</svg>

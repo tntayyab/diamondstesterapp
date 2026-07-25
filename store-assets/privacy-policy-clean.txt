@@ -1,0 +1,57 @@
+Privacy Policy — Spider Identifier
+
+Last updated: 17 July 2026
+
+Spider Identifier ("the app", "we", "us") helps you identify spiders from photos, learn about species, and keep a field journal. This policy explains what data the app handles and why.
+
+Contact: hellospideridentifier@gmail.com
+
+
+INFORMATION WE COLLECT
+
+Account information. When you create an account we store your email address and an encrypted password (handled by our backend provider, Supabase). Your display name and optional profile photo are stored if you add them.
+
+Photos you submit. When you identify a spider, the photo you take or choose is sent to our AI provider (Anthropic) through our secure server to analyse the image and return a result. Photos are processed for identification and are not used to advertise to you. Photos you deliberately share to the community feed are stored and shown publicly.
+
+Location (optional). If you grant permission, approximate or precise location is used to tag field-journal sightings and to show which species occur near you. You can decline this and still use the app.
+
+Community content. Posts, comments, and likes you create are stored and visible to other users.
+
+Purchases. If you buy a subscription, the transaction is processed by Google Play Billing / RevenueCat. We do not receive your card details.
+
+Advertising identifiers. The app shows Google AdMob rewarded ads. AdMob may collect your device advertising ID and related device information to serve and measure ads. We request non-personalised ads by default.
+
+
+HOW WE USE YOUR DATA
+
+To provide spider identification, keep your account and history, run the community feed, show rewarded ads that grant in-app credits, and improve the app. We do NOT sell your personal data.
+
+
+THIRD PARTIES WE SHARE DATA WITH
+
+Supabase — account, database, and storage (backend).
+Anthropic — AI processing of your submitted photo/question (spider ID + chat).
+Google AdMob — advertising.
+Google Play Billing / RevenueCat — purchases (if used).
+
+Data is transmitted over encrypted (HTTPS) connections.
+
+
+CHILDREN
+
+The app is not directed to children under 13, and we do not knowingly collect data from them.
+
+
+YOUR CHOICES & DATA DELETION
+
+You can edit or remove your profile in the app. To delete your account and all associated data, email hellospideridentifier@gmail.com and we will action the request.
+
+
+CHANGES
+
+We may update this policy; material changes will be posted here with a new date.
+
+
+MEDICAL DISCLAIMER
+
+AI identification is informational only and is not a substitute for professional medical or pest-control advice. If you are bitten and feel unwell, seek medical help immediately.
