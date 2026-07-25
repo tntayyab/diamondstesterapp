@@ -34,7 +34,10 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.VIBRATE",
-        "com.android.vending.BILLING"
+        "com.android.vending.BILLING",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -84,6 +87,13 @@
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7c6e568c-d6e4-4c14-9961-f0bdbf08ac93"
+      }
+    },
+    "owner": "ninjamul"
   }
 }
