@@ -134,7 +134,7 @@ export const RESULT_SCHEMA = {
   properties: {
     stoneType: { type: "string", enum: STONE_TYPES },
     authenticityLevel: { type: "string", enum: AUTHENTICITY_LEVELS },
-    confidence: { type: "integer", minimum: 0, maximum: 100 },
+    confidence: { type: "integer" },
     visualObservations: { type: "array", items: { type: "string" } },
     redFlags: { type: "array", items: { type: "string" } },
     recommendedNextSteps: { type: "array", items: { type: "string" } },

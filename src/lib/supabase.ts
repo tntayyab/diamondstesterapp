@@ -46,6 +46,25 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
   return (data as Profile) ?? null;
 }
 
+/** Public name/avatar for ANY user (via the public_profiles view). Use this to
+ *  view someone else's profile — the `profiles` table's RLS only lets a user
+ *  read their OWN row, so fetchProfile(otherUserId) always returns null. */
+export interface PublicProfile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
+export async function fetchPublicProfile(userId: string): Promise<PublicProfile | null> {
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("public_profiles")
+    .select("id, full_name, avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+  return (data as PublicProfile) ?? null;
+}
+
 /** Persist a completed scan to the shared `analyses` table (best-effort). */
 export async function syncAnalysis(
   userId: string,

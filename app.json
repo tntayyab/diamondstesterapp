@@ -14,14 +14,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.diamondstester.app",
+      "bundleIdentifier": "com.appsrocks24.diamondstester",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.diamondstester.app",
+      "package": "com.appsrocks24.diamondstester",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
@@ -74,7 +74,7 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+          "androidAppId": "ca-app-pub-9887085756488574~1748257552"
         }
       ],
       [

@@ -8,6 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppAlertHost } from "@/components/AppAlert";
 import { AuthForm } from "@/components/AuthForm";
 import { CreditGateProvider } from "@/components/CreditGate";
+import { InterstitialTimer } from "@/components/InterstitialTimer";
 import { RecoveryGate } from "@/components/RecoveryGate";
 import { Onboarding } from "@/components/Onboarding";
 import { SplashAnimation } from "@/components/SplashAnimation";
@@ -150,6 +151,7 @@ export default function RootLayout() {
                 <OnboardingGate>
                   <RequireAuth>
                     <RootStack />
+                    <InterstitialTimer />
                   </RequireAuth>
                 </OnboardingGate>
               </SplashGate>

@@ -28,7 +28,7 @@ const ITEMS: Item[] = [
     icon: "star",
     label: "Rate Us!",
     action: () =>
-      void Linking.openURL("market://details?id=com.diamondstester.app").catch(() =>
+      void Linking.openURL("market://details?id=com.appsrocks24.diamondstester").catch(() =>
         Linking.openURL(env.app.siteUrl),
       ),
   },

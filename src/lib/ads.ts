@@ -64,8 +64,11 @@ function interstitialUnitId(mod: AdsModule): string {
   return configured || mod.TestIds.INTERSTITIAL;
 }
 
-// Frequency cap so interstitials never feel spammy (and stay policy-safe).
-const INTERSTITIAL_MIN_GAP_MS = 2 * 60 * 1000; // at most one per 2 minutes
+// Frequency cap so interstitials stay policy-safe. The global InterstitialTimer
+// (see src/components/InterstitialTimer.tsx) ticks every 60s; this cap is what
+// actually enforces "at most one full-screen ad per minute" across every
+// trigger (timer + scan result + quiz).
+const INTERSTITIAL_MIN_GAP_MS = 60 * 1000; // at most one per minute
 const LAUNCH_GRACE_MS = 30 * 1000; // none in the first 30s after launch
 const launchedAt = Date.now();
 let lastInterstitialAt = 0;

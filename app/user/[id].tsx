@@ -8,7 +8,7 @@ import { Button, EmptyState, Screen, ThemedText } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 import { communityAvailable, fetchFeed, followCounts, isFollowing, toggleFollow, type FeedPost } from "@/lib/community";
 import { tap } from "@/lib/feedback";
-import { fetchProfile, type Profile } from "@/lib/supabase";
+import { fetchPublicProfile, type PublicProfile } from "@/lib/supabase";
 import { spacing, useTheme } from "@/theme";
 
 /** Another user's public profile — avatar, follower/following counts, their posts and a Follow toggle. */
@@ -18,7 +18,7 @@ export default function UserProfileScreen() {
   const { colors } = useTheme();
   const { user } = useAuth();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [counts, setCounts] = useState({ followers: 0, following: 0 });
   const [following, setFollowing] = useState(false);
@@ -33,7 +33,7 @@ export default function UserProfileScreen() {
       return;
     }
     const [fetchedProfile, fetchedCounts, fetchedPosts] = await Promise.all([
-      fetchProfile(id),
+      fetchPublicProfile(id),
       followCounts(id),
       fetchFeed({ authorId: id, viewerId: user?.id ?? null }),
     ]);
