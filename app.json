@@ -14,14 +14,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.appsrocks24.diamondstester",
+      "bundleIdentifier": "com.appsgurus24.diamondstester",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.appsrocks24.diamondstester",
+      "package": "com.appsgurus24.diamondstester",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",

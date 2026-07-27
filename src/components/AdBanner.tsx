@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/ui";
+import { env } from "@/config/env";
 import { adsAvailable, bannerComponents, bannerUnitId } from "@/lib/ads";
 import { tap } from "@/lib/feedback";
 import { spacing, useTheme, withAlpha } from "@/theme";
@@ -54,6 +55,14 @@ function HouseBanner() {
  * layout never jumps once real ads are wired in later.
  */
 export function AdBanner() {
+  // Master ads switch off → render nothing at all (no real ad, no house ad).
+  // Checked before any hook so the (build-constant) condition can't change
+  // hook order between renders.
+  if (!env.ads.enabled) return null;
+  return <AdBannerInner />;
+}
+
+function AdBannerInner() {
   const { colors } = useTheme();
   const [ready, setReady] = useState(adsAvailable());
 

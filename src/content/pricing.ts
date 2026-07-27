@@ -31,12 +31,12 @@ export const pricingTiers: PricingTier[] = [
     firstMonth: 2.49,
     regular: 4.99,
     credits: 120,
-    ids: "~12 identifications / mo",
-    perId: "$0.42 per ID",
+    ids: "~12 scans / mo",
+    perId: "$0.42 per scan",
     features: [
-      "Full AI species identification",
+      "Full AI diamond & gemstone testing",
       "Authenticity confidence on every result",
-      "Look-alike & similar-species alerts",
+      "Simulant alerts (moissanite, CZ & more)",
       "120 credits every month",
       "7-day free trial",
       "Cancel anytime",
@@ -48,14 +48,14 @@ export const pricingTiers: PricingTier[] = [
     firstMonth: 4.99,
     regular: 9.99,
     credits: 550,
-    ids: "~55 identifications / mo",
-    perId: "$0.18 per ID",
+    ids: "~55 scans / mo",
+    perId: "$0.18 per scan",
     highlighted: true,
     features: [
       "Everything in Starter",
       "550 credits every month",
-      "PDF identification reports",
-      "Full field-journal access",
+      "PDF result reports",
+      "Full collection & scan history",
       "Priority AI — faster results",
     ],
   },
@@ -65,21 +65,21 @@ export const pricingTiers: PricingTier[] = [
     firstMonth: 9.99,
     regular: 19.99,
     credits: 1200,
-    ids: "~120 identifications / mo",
-    perId: "$0.17 per ID — best value",
+    ids: "~120 scans / mo",
+    perId: "$0.17 per scan — best value",
     features: [
       "Everything in Explorer",
       "1,200 credits every month",
       "CSV data export",
       "Priority customer support",
-      "Best value per identification",
+      "Best value per scan",
     ],
   },
 ];
 
 export const freeTier = {
   name: "Just trying it out?",
-  blurb: "Get 30 free credits — about 3 identifications — with no credit card. Free forever.",
+  blurb: "Get 30 free credits — about 3 scans — with no credit card. Free forever.",
 };
 
 export const pricingHowItWorks = [

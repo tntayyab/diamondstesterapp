@@ -86,6 +86,7 @@ function interstitialSlotAvailable(): boolean {
  * the frequency cap allows. Never shows on web/Expo Go. Fire-and-forget.
  */
 export function maybeShowInterstitial(): void {
+  if (!env.ads.enabled) return;
   const mod = loadAds();
   if (!mod || !nativeReady) return;
   if (!interstitialSlotAvailable()) return;
@@ -128,6 +129,7 @@ export function maybeShowInterstitial(): void {
  * and dropping in real AdMob keys later switches every call site automatically.
  */
 export function presentInterstitial(onHouseFallback: () => void): void {
+  if (!env.ads.enabled) return;
   if (!interstitialSlotAvailable()) return;
 
   const mod = loadAds();

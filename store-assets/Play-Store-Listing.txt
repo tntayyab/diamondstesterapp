@@ -1,0 +1,70 @@
+DIAMONDS TESTER — GOOGLE PLAY STORE LISTING TEXT
+(copy-paste each block into the matching field in Play Console)
+======================================================================
+
+APP TITLE (max 30 characters):
+Diamonds Tester - Gem Scanner
+
+----------------------------------------------------------------------
+SHORT DESCRIPTION (max 80 characters):
+AI diamond & gemstone check + real at-home tests. Honest, not a lab result.
+
+----------------------------------------------------------------------
+FULL DESCRIPTION (max 4000 characters):
+
+Diamonds Tester – Diamond & Gemstone Testing with AI
+
+Curious whether that ring or stone is a real diamond — or a moissanite, cubic zirconia, or glass? Diamonds Tester helps you find out. Point your camera at a diamond or gemstone and our AI gives an instant visual estimate of what it most likely is and how genuine it looks — then walks you through the real, at-home tests you can do yourself.
+
+💎 Honest & upfront
+No phone app can prove with certainty that a stone is a real diamond. Our AI gives a visual estimate from a photo — a helpful guide, not a lab certificate or appraisal. That is exactly why the app also teaches the real tests and points you toward professional verification for anything valuable.
+
+📸 Instant AI stone scan
+Snap or upload a photo. Get the likely stone type (diamond, moissanite, CZ, glass or another gem), a genuine / uncertain / simulant / synthetic reading, a confidence score, what the AI saw, any red flags, and clear next steps.
+
+🔬 Real at-home tests (step by step)
+• Fog / breath test
+• Water / density test
+• Loupe (10x) inspection
+• Sparkle & fire test
+• Setting & hallmark check (10K, 14K, 585, 750, 925)
+• Honest heat / thermal explainer (a phone cannot run a real thermal test)
+
+🔦 UV fluorescence guide
+Many natural diamonds glow blue under UV while most simulants do not. Our honest guided checklist helps you observe and understand it with a real blacklight (a phone screen cannot emit UV light, and we say so clearly).
+
+📚 Gemstone library
+Real-photo profiles of Diamond, Lab-Grown Diamond, Moissanite, Cubic Zirconia, White Sapphire, Quartz and Glass — and how to tell them apart.
+
+📐 The 4Cs, explained
+Cut, Color, Clarity and Carat in plain English, plus a glossary of the jewelry and lab-report terms you will actually see.
+
+🧮 Value estimator
+A rough estimated price range from shape, color, clarity and carat — a ballpark to set expectations, not a formal valuation.
+
+💬 Ask the Gemologist
+A built-in AI chat for your diamond and gemstone questions, honest about what a chat can and cannot confirm.
+
+Plus a gemstone identification quiz, saved scans and a personal collection, and a friendly community to share and discuss your finds.
+
+⭐ Why choose Diamonds Tester?
+✔ Instant AI visual estimate of diamonds and gemstones
+✔ Real, step-by-step at-home tests — not just an app gimmick
+✔ A UV fluorescence guide most apps skip
+✔ Clear gemstone library with real photos
+✔ The 4Cs and jewelry terms explained simply
+✔ Value estimator to set price expectations
+✔ Ask-the-Gemologist AI chat
+✔ 30 free credits to start — no card required
+✔ Honest about being an educational tool, never a fake “lab result”
+
+👥 Perfect for shoppers checking a purchase, gift-buyers, resellers and thrifters, jewelry lovers, couples ring-shopping, students, and anyone simply curious.
+
+Disclaimer
+Diamonds Tester is an educational tool. Its AI provides a visual estimate from a photograph and its guides teach real testing methods — but neither is a laboratory certification, a professional appraisal, or a guarantee of a stone’s identity, authenticity or value. No app or phone camera can definitively prove a diamond is real. For any purchase, sale, insurance or high-value decision, please rely on a certified gemologist, an accredited laboratory (such as GIA or IGI), or a trusted jeweler.
+
+Download Diamonds Tester today and get an instant AI read on any diamond or gemstone — then learn to check it yourself the way the pros do.
+
+----------------------------------------------------------------------
+PROMO BLURB (under 60 words — for social / website / ads):
+Diamonds Tester gives an instant AI visual estimate of whether a diamond or gemstone looks real — then teaches the actual at-home tests jewelers use: fog, water, loupe and setting checks, plus the 4Cs, a UV guide, a value estimator and a gemstone library. Honest and educational — a smart starting point, not a lab certification.

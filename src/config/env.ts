@@ -76,6 +76,12 @@ export const env = {
   },
 
   ads: {
+    /**
+     * Master switch. Set EXPO_PUBLIC_ADS_ENABLED="0" to fully hide the banner
+     * and the timed interstitial (e.g. for a clean test build or screenshots).
+     * Defaults to on. The opt-in "watch ad → earn credits" reward is unaffected.
+     */
+    enabled: flag(process.env.EXPO_PUBLIC_ADS_ENABLED, true),
     /** Rewarded-ad unit id shown for the "watch ad → earn credits" reward. */
     rewardedAndroid: admobRewardedAndroid,
     rewardedIos: admobRewardedIos,
