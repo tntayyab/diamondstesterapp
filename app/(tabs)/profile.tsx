@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { AdBanner } from "@/components/AdBanner";
 import { HamburgerButton } from "@/components/HamburgerButton";
@@ -77,7 +77,12 @@ export default function ProfileScreen() {
   }, [signOut]);
 
   return (
-    <Screen scroll>
+    <Screen>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <HamburgerButton />
         <ThemedText variant="title">Profile</ThemedText>
@@ -162,7 +167,7 @@ export default function ProfileScreen() {
             <Divider />
             <Row
               icon="bookmark"
-              label="Saved gemstones & guides"
+              label="Saved diamonds & guides"
               value={String(stats?.saved ?? 0)}
               onPress={() => router.push("/saved")}
             />
@@ -205,14 +210,16 @@ export default function ProfileScreen() {
         <Divider />
         <Row icon="dollar-sign" label="Value estimator" onPress={() => router.push("/calculator")} />
         <Divider />
-        <Row icon="git-merge" label="Compare gemstones" onPress={() => router.push("/compare")} />
-        {/* The quiz tracks a personal best, so it lives behind an account. */}
+        <Row icon="git-merge" label="Compare diamonds" onPress={() => router.push("/compare")} />
+        <Divider />
+        <Row icon="image" label="Spot the diamond (photo quiz)" onPress={() => router.push("/photo-quiz")} />
+        {/* The knowledge quiz tracks a personal best, so it lives behind an account. */}
         {user ? (
           <>
             <Divider />
             <Row
               icon="help-circle"
-              label="4Cs & gemstone quiz"
+              label="4Cs & diamond quiz"
               value={stats?.quizBest ? `Best ${stats.quizBest}/8` : undefined}
               onPress={() => router.push("/quiz")}
             />
@@ -245,7 +252,9 @@ export default function ProfileScreen() {
       <ThemedText variant="caption" muted style={{ textAlign: "center", marginTop: spacing.xl, fontSize: 12 }}>
         {env.app.siteUrl.replace("https://", "")}
       </ThemedText>
+      </ScrollView>
 
+      {/* Sticky banner — pinned above the tab bar, like Learn & Guides */}
       <AdBanner />
     </Screen>
   );

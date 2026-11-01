@@ -1,10 +1,12 @@
 import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { AdBanner } from "@/components/AdBanner";
 import { Card, EmptyState, Screen, ThemedText } from "@/components/ui";
+import { heroSlides } from "@/content/appImages";
 import { guides, type Guide } from "@/content/guides";
 import { tap } from "@/lib/feedback";
 import { fontSize, radius, spacing, useTheme } from "@/theme";
@@ -99,22 +101,33 @@ export default function GuidesScreen() {
         data={visible}
         keyExtractor={(guide) => guide.slug}
         ListHeaderComponent={header}
-        renderItem={({ item }) => (
-          <Card onPress={() => router.push(`/guides/${item.slug}`)} style={{ marginBottom: spacing.md }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-              <ThemedText variant="label" color={colors.tint}>
-                {item.category}
+        renderItem={({ item, index }) => (
+          <Card
+            onPress={() => router.push(`/guides/${item.slug}`)}
+            style={{ marginBottom: spacing.md, padding: 0, overflow: "hidden" }}
+          >
+            <Image
+              source={heroSlides[index % heroSlides.length]}
+              style={{ width: "100%", height: 130 }}
+              contentFit="cover"
+              transition={150}
+            />
+            <View style={{ padding: spacing.lg }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                <ThemedText variant="label" color={colors.tint}>
+                  {item.category}
+                </ThemedText>
+                <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
+                  · {item.readMinutes} min read
+                </ThemedText>
+              </View>
+              <ThemedText variant="heading" style={{ marginTop: spacing.sm }}>
+                {item.title}
               </ThemedText>
-              <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
-                · {item.readMinutes} min read
+              <ThemedText variant="caption" muted style={{ marginTop: 6 }}>
+                {item.excerpt}
               </ThemedText>
             </View>
-            <ThemedText variant="heading" style={{ marginTop: spacing.sm }}>
-              {item.title}
-            </ThemedText>
-            <ThemedText variant="caption" muted style={{ marginTop: 6 }}>
-              {item.excerpt}
-            </ThemedText>
           </Card>
         )}
         ListEmptyComponent={

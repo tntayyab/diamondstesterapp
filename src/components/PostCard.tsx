@@ -34,6 +34,24 @@ export function PostCard({ post, onOpen }: { post: FeedPost; onOpen?: () => void
   const species = post.species_slug ? getSpecies(post.species_slug) : undefined;
   const photos = post.image_urls && post.image_urls.length > 0 ? post.image_urls : post.image_url ? [post.image_url] : [];
 
+  // Anonymous posters (no name) are not tappable — there's no real profile to open.
+  const hasName = Boolean(post.author_name && post.author_name.trim());
+  const authorContent = (
+    <>
+      <Avatar name={post.author_name} uri={post.author_avatar} size={40} />
+      <View style={{ flex: 1 }}>
+        <ThemedText variant="body" style={{ fontWeight: "700" }} numberOfLines={1}>
+          {post.author_name?.trim() || "Gem hunter"}
+        </ThemedText>
+        <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
+          {timeAgo(post.created_at)}
+          {post.location ? ` · ${post.location}` : ""}
+        </ThemedText>
+      </View>
+    </>
+  );
+  const authorRowStyle = { flexDirection: "row" as const, alignItems: "center" as const, flex: 1, gap: spacing.md };
+
   const open = () => {
     tap();
     if (onOpen) onOpen();
@@ -77,24 +95,19 @@ export function PostCard({ post, onOpen }: { post: FeedPost; onOpen?: () => void
     <Card style={{ marginBottom: spacing.lg, padding: 0, overflow: "hidden" }}>
       {/* Author row */}
       <View style={styles.header}>
-        <Pressable
-          onPress={() => {
-            tap();
-            router.push(`/user/${post.user_id}`);
-          }}
-          style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: spacing.md }}
-        >
-          <Avatar name={post.author_name} uri={post.author_avatar} size={40} />
-          <View style={{ flex: 1 }}>
-            <ThemedText variant="body" style={{ fontWeight: "700" }} numberOfLines={1}>
-              {post.author_name ?? "Gem hunter"}
-            </ThemedText>
-            <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
-              {timeAgo(post.created_at)}
-              {post.location ? ` · ${post.location}` : ""}
-            </ThemedText>
-          </View>
-        </Pressable>
+        {hasName ? (
+          <Pressable
+            onPress={() => {
+              tap();
+              router.push(`/user/${post.user_id}`);
+            }}
+            style={authorRowStyle}
+          >
+            {authorContent}
+          </Pressable>
+        ) : (
+          <View style={authorRowStyle}>{authorContent}</View>
+        )}
         {species ? <AuthenticityBadge level={species.venomLevel} /> : null}
       </View>
 

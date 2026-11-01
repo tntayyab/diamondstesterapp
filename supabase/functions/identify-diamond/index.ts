@@ -24,7 +24,7 @@ const GUEST_FREE_SCANS = 2;
 
 // Keep these aligned with EXPO_PUBLIC_AI_MODEL_* in the app's .env.
 const MODEL_FREE = "claude-haiku-4-5";
-const MODEL_PRO = "claude-sonnet-5";
+const MODEL_PRO = "claude-haiku-4-5";
 
 const STONE_TYPES = ["Diamond", "Moissanite", "Cubic Zirconia", "Glass", "Other natural gemstone", "Inconclusive"];
 const AUTHENTICITY_LEVELS = ["genuine", "uncertain", "simulant", "synthetic"];

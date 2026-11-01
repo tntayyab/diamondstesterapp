@@ -111,6 +111,111 @@ export function withAlpha(color: string, alpha: number): string {
   return color;
 }
 
+// ── Custom (user-picked) colours ─────────────────────────────────────────────
+// The user can override the base theme's background and/or text colour from
+// Settings → Appearance. We derive the rest of the palette from those two so the
+// result stays coherent (cards slightly lifted off the background, muted/faint
+// text as fades of the chosen text colour) instead of clashing with the base.
+
+export interface CustomColors {
+  background: string | null;
+  text: string | null;
+}
+
+function parseHex(hex: string): { r: number; g: number; b: number } | null {
+  const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
+  if (!m) return null;
+  const int = parseInt(m[1], 16);
+  return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
+}
+
+/** True when `value` is a valid 6-digit hex colour (with or without a leading #). */
+export function isHexColor(value: string): boolean {
+  return parseHex(value) !== null;
+}
+
+/** Normalise "abc123" / "#ABC123" → "#abc123"; returns null when not a hex colour. */
+export function normalizeHex(value: string): string | null {
+  const c = parseHex(value);
+  return c ? rgbToHex(c) : null;
+}
+
+function rgbToHex({ r, g, b }: { r: number; g: number; b: number }): string {
+  const to = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${to(r)}${to(g)}${to(b)}`;
+}
+
+function luminance({ r, g, b }: { r: number; g: number; b: number }): number {
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+function mix(
+  a: { r: number; g: number; b: number },
+  b: { r: number; g: number; b: number },
+  t: number,
+): { r: number; g: number; b: number } {
+  return { r: a.r + (b.r - a.r) * t, g: a.g + (b.g - a.g) * t, b: a.b + (b.b - a.b) * t };
+}
+
+function rgba(hex: string, alpha: number): string {
+  const c = parseHex(hex);
+  if (!c) return hex;
+  return `rgba(${Math.round(c.r)}, ${Math.round(c.g)}, ${Math.round(c.b)}, ${alpha})`;
+}
+
+/**
+ * Builds a full palette from a base theme plus the user's chosen background
+ * and/or text colour. Unset overrides fall back to the base value. The brand
+ * `tint`/`danger` are always preserved so buttons and alerts stay on-brand.
+ */
+export function customPalette(base: Palette, bgHex: string | null, textHex: string | null): Palette {
+  const bg = bgHex ? parseHex(bgHex) : null;
+  const isLight = bg ? luminance(bg) > 0.55 : base.mode === "light";
+  const towards = isLight ? { r: 0, g: 0, b: 0 } : { r: 255, g: 255, b: 255 };
+  // When the user picks a background but no text colour, auto-pick a readable
+  // text colour for that background instead of inheriting the base theme's
+  // (which would be near-white on a light custom background, i.e. invisible).
+  const text = textHex ?? (bg ? (isLight ? "#161A2E" : "#F1F3FA") : base.text);
+  const edge = textHex ?? (isLight ? "#000000" : "#ffffff");
+
+  return {
+    ...base,
+    mode: isLight ? "light" : "dark",
+    background: bgHex ?? base.background,
+    backgroundElevated: bg ? rgbToHex(mix(bg, towards, 0.05)) : base.backgroundElevated,
+    card: bg ? rgbToHex(mix(bg, towards, 0.09)) : base.card,
+    cardBorder: rgba(edge, 0.16),
+    border: rgba(edge, 0.16),
+    text,
+    textMuted: rgba(text, 0.62),
+    textFaint: rgba(text, 0.42),
+    tabInactive: rgba(text, 0.42),
+    glass: rgba(isLight ? "#000000" : "#ffffff", 0.06),
+  };
+}
+
+/** Curated background swatches offered in Settings → Appearance. */
+export const CUSTOM_BACKGROUNDS: string[] = [
+  "#070C16", // deep navy (default dark)
+  "#000000", // black
+  "#12131A", // charcoal
+  "#1A1330", // deep purple
+  "#0C1F1A", // deep green
+  "#231016", // wine
+  "#F6F8FF", // icy white (default light)
+  "#FFF7EC", // warm cream
+];
+
+/** Curated text swatches offered in Settings → Appearance. */
+export const CUSTOM_TEXTS: string[] = [
+  "#F1F3FA", // near-white
+  "#FFFFFF", // white
+  "#161A2E", // ink
+  "#E8D9A8", // soft gold
+  "#B7C7FF", // periwinkle
+  "#A8E6CF", // mint
+];
+
 export const spacing = {
   xs: 4,
   sm: 8,

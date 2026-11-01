@@ -22,7 +22,19 @@ export default function CreatePostScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { user } = useAuth();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const {
+    id,
+    images: paramImages,
+    title: paramTitle,
+    description: paramDesc,
+    species: paramSpecies,
+  } = useLocalSearchParams<{
+    id?: string;
+    images?: string;
+    title?: string;
+    description?: string;
+    species?: string;
+  }>();
   const editing = Boolean(id);
 
   /** Staged photos for the new post (max `MAX_IMAGES`). Ignored entirely in edit mode. */
@@ -49,6 +61,27 @@ export default function CreatePostScreen() {
       setSpeciesSlug(post.species_slug);
     });
   }, [id]);
+
+  // Prefill from a scan result — the "Post to community" button on the result
+  // screen passes the photos, a suggested caption and the matched gemstone, so
+  // sharing a find is a couple of taps. Runs once on mount; ignored in edit mode.
+  useEffect(() => {
+    if (id) return;
+    if (paramImages) {
+      try {
+        const arr = JSON.parse(paramImages) as unknown;
+        if (Array.isArray(arr)) {
+          setImages(arr.filter((u): u is string => typeof u === "string").slice(0, MAX_IMAGES));
+        }
+      } catch {
+        /* ignore malformed param */
+      }
+    }
+    if (paramTitle) setTitle(paramTitle);
+    if (paramDesc) setDescription(paramDesc);
+    if (paramSpecies) setSpeciesSlug(paramSpecies);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickImages = useCallback(async () => {
     tap();
@@ -209,9 +242,9 @@ export default function CreatePostScreen() {
         </View>
 
         {/* Species picker */}
-        <SectionHeader title="Which gemstone? (optional)" />
+        <SectionHeader title="Which diamond? (optional)" />
         <ThemedText variant="caption" muted style={{ marginBottom: spacing.md }}>
-          Tag a gemstone so your post shows up in that category.
+          Tag a diamond so your post shows up in that category.
         </ThemedText>
         <View style={styles.speciesGrid}>
           {PICKABLE.map((s) => {

@@ -256,7 +256,24 @@ export default function ResultScreen() {
       ) : null}
 
       <View style={{ gap: spacing.md, marginTop: spacing.lg }}>
-        <Button label="Share result" icon="share-2" onPress={shareResult} />
+        <Button
+          label="Post to community"
+          icon="users"
+          onPress={() => {
+            router.push({
+              pathname: "/post/create",
+              params: {
+                images: JSON.stringify(photos),
+                title: result.stoneType,
+                description:
+                  `Scanned with Diamonds Tester — ${result.stoneType} · ${result.confidence}% confidence (${result.authenticityLevel}).` +
+                  (result.visualObservations[0] ? ` ${result.visualObservations[0]}` : ""),
+                species: libraryMatch?.slug ?? "",
+              },
+            });
+          }}
+        />
+        <Button label="Share result" icon="share-2" variant="secondary" onPress={shareResult} />
         <Button label="Export PDF report" icon="file-text" variant="secondary" onPress={() => void exportResultPdf(scan)} />
         <Button label="Delete scan" icon="trash-2" variant="danger" onPress={remove} />
       </View>

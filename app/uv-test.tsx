@@ -4,7 +4,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Modal, Pressable, StyleSheet, View } from "react-native";
 
 import { showAlert } from "@/components/AppAlert";
+import { ScreenHero } from "@/components/ScreenHero";
 import { Button, Card, SectionHeader, Screen, ThemedText } from "@/components/ui";
+import { appImages } from "@/content/appImages";
 import { success, tap } from "@/lib/feedback";
 import { addUvLog, setScanUvObservation, type UvObservation } from "@/lib/storage";
 import { radius, spacing, useTheme, withAlpha } from "@/theme";
@@ -84,6 +86,7 @@ export default function UvTestScreen() {
 
   return (
     <Screen scroll>
+      <ScreenHero image={appImages.uvGlow} />
       <ThemedText variant="title">UV fluorescence test</ThemedText>
       <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
         A genuinely useful supplementary clue — never a standalone verdict.

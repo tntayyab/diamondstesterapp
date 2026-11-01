@@ -15,6 +15,7 @@
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { Platform } from "react-native";
 
+import { adFreeActive } from "@/lib/adFree";
 import { env } from "@/config/env";
 
 /**
@@ -87,6 +88,7 @@ function interstitialSlotAvailable(): boolean {
  */
 export function maybeShowInterstitial(): void {
   if (!env.ads.enabled) return;
+  if (adFreeActive()) return; // Ad-Free subscribers never see full-screen ads.
   const mod = loadAds();
   if (!mod || !nativeReady) return;
   if (!interstitialSlotAvailable()) return;
@@ -130,6 +132,7 @@ export function maybeShowInterstitial(): void {
  */
 export function presentInterstitial(onHouseFallback: () => void): void {
   if (!env.ads.enabled) return;
+  if (adFreeActive()) return; // Ad-Free subscribers never see full-screen ads.
   if (!interstitialSlotAvailable()) return;
 
   const mod = loadAds();

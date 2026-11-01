@@ -24,7 +24,7 @@ export default function QuizScreen() {
   return (
     <AuthGate
       title="Sign in to take the quiz"
-      body="The 4Cs & gemstone quiz records your best score and counts toward your achievements, so it needs an account."
+      body="The 4Cs & diamond quiz records your best score and counts toward your achievements, so it needs an account."
     >
       <Quiz />
     </AuthGate>
@@ -95,7 +95,7 @@ function Quiz() {
     const res = await spendCredits(QUIZ_COST);
     if (!res.ok) {
       creditGate.showOutOfCredits({
-        message: `The gemstone quiz costs ${QUIZ_COST} credits per attempt. Watch a short ad to earn some.`,
+        message: `The diamond quiz costs ${QUIZ_COST} credits per attempt. Watch a short ad to earn some.`,
         onCredited: () => payRef.current(),
       });
       return;
@@ -305,7 +305,7 @@ function Quiz() {
 
       <Card style={{ marginTop: spacing.xl }}>
         <ThemedText variant="label" muted>
-          Gemstone knowledge
+          Diamond knowledge
         </ThemedText>
         <ThemedText variant="heading" style={{ marginTop: spacing.sm }}>
           {question.prompt}

@@ -198,7 +198,7 @@ const QUESTION_BANK: QuizQuestion[] = [
     explanation: "Brilliance is the total white light return; 'fire' (a separate term) refers to the rainbow-coloured flashes caused by dispersion.",
   },
   {
-    prompt: "What is 'fire' in a cut gemstone?",
+    prompt: "What is 'fire' in a cut diamond?",
     options: [
       "Rainbow-coloured flashes caused by light splitting into spectral colours",
       "A red tint sometimes seen in low-grade stones",
@@ -331,7 +331,7 @@ const QUESTION_BANK: QuizQuestion[] = [
     explanation: "Reliable diamond testing relies on physical properties — thermal conductivity, density, magnified inclusion patterns, spectroscopy — none of which a photo alone can measure.",
   },
   {
-    prompt: "What is the 'table' of a cut gemstone?",
+    prompt: "What is the 'table' of a cut diamond?",
     options: [
       "The large flat facet on top of the stone",
       "The pointed tip at the bottom",
@@ -432,7 +432,7 @@ export const achievements: Achievement[] = [
   {
     key: "save-library",
     title: "Building a library",
-    description: "Save 3 gemstone reference entries.",
+    description: "Save 3 diamond reference entries.",
     icon: "bookmark",
     progress: (s) => ({ value: Math.min(s.savedSpecies, 3), goal: 3 }),
   },
@@ -460,7 +460,7 @@ export const achievements: Achievement[] = [
   {
     key: "quiz-perfect",
     title: "4Cs expert",
-    description: "Score a perfect 8/8 on the gemstone quiz.",
+    description: "Score a perfect 8/8 on the diamond quiz.",
     icon: "help-circle",
     progress: (s) => ({ value: Math.min(s.quizBest, 8), goal: 8 }),
   },

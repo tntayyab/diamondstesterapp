@@ -2,7 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
 import { AdBanner } from "@/components/AdBanner";
@@ -129,14 +129,31 @@ export default function CommunityScreen() {
     );
   }
 
+  // Interleave a banner ad after every 2 posts in the feed.
+  const rows = useMemo<Array<{ kind: "post"; post: FeedPost } | { kind: "ad"; id: string }>>(() => {
+    const out: Array<{ kind: "post"; post: FeedPost } | { kind: "ad"; id: string }> = [];
+    posts.forEach((post, i) => {
+      out.push({ kind: "post", post });
+      if ((i + 1) % 2 === 0) out.push({ kind: "ad", id: `ad-${post.id}` });
+    });
+    return out;
+  }, [posts]);
+
   return (
     <Screen edges={["top"]}>
       <FlatList
-        data={posts}
-        keyExtractor={(post) => post.id}
+        data={rows}
+        keyExtractor={(row) => (row.kind === "post" ? row.post.id : row.id)}
         ListHeaderComponent={strip}
-        renderItem={({ item }) => <PostCard post={item} />}
-        ListFooterComponent={posts.length ? <AdBanner /> : null}
+        renderItem={({ item }) =>
+          item.kind === "ad" ? (
+            <View style={{ marginBottom: spacing.lg }}>
+              <AdBanner />
+            </View>
+          ) : (
+            <PostCard post={item.post} />
+          )
+        }
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 96 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.tint} />}

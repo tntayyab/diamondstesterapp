@@ -150,7 +150,7 @@ export default function SpeciesDetailScreen() {
           onPress={toggle}
         />
         <Button
-          label="Compare with another gemstone"
+          label="Compare with another diamond"
           icon="git-merge"
           variant="secondary"
           onPress={() => router.push("/compare")}

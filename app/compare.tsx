@@ -2,7 +2,9 @@ import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { ScreenHero } from "@/components/ScreenHero";
 import { Card, Screen, SectionHeader, ThemedText, AuthenticityBadge } from "@/components/ui";
+import { appImages } from "@/content/appImages";
 import { getSpecies, speciesLibrary, type Species } from "@/content/species";
 import { tap } from "@/lib/feedback";
 import { radius, spacing, useTheme } from "@/theme";
@@ -48,6 +50,7 @@ export default function CompareScreen() {
 
   return (
     <Screen scroll>
+      <ScreenHero image={appImages.loupe} height={130} />
       <ThemedText variant="caption" muted>
         Tap a name to swap it. The rows below line up so differences jump out.
       </ThemedText>

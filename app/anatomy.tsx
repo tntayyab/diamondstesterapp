@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+import { ScreenHero } from "@/components/ScreenHero";
 import { Card, Screen, ThemedText } from "@/components/ui";
 import { anatomyParts } from "@/content/reference";
+import { appImages } from "@/content/appImages";
 import { tap } from "@/lib/feedback";
 import { spacing, useTheme } from "@/theme";
 
@@ -13,6 +15,7 @@ export default function AnatomyScreen() {
 
   return (
     <Screen scroll>
+      <ScreenHero image={appImages.fingertip} />
       <ThemedText variant="title">Anatomy of a diamond</ThemedText>
       <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
         The parts of a cut stone a gemologist checks first — and the ones that drive brilliance and fire.

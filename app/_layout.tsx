@@ -8,10 +8,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppAlertHost } from "@/components/AppAlert";
 import { AuthForm } from "@/components/AuthForm";
 import { CreditGateProvider } from "@/components/CreditGate";
+import { InAppUpdater } from "@/components/InAppUpdater";
 import { InterstitialTimer } from "@/components/InterstitialTimer";
 import { RecoveryGate } from "@/components/RecoveryGate";
 import { Onboarding } from "@/components/Onboarding";
 import { SplashAnimation } from "@/components/SplashAnimation";
+import { refreshAdFree } from "@/lib/adFree";
 import { initAds } from "@/lib/ads";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { initPurchases } from "@/lib/purchases";
@@ -83,7 +85,9 @@ function PurchasesBridge() {
 
   useEffect(() => {
     if (loading) return;
-    void initPurchases(user?.id ?? null);
+    // Wire RevenueCat to this user, then read the Ad-Free entitlement so ads are
+    // suppressed immediately on launch for an existing subscriber.
+    void initPurchases(user?.id ?? null).then(() => refreshAdFree());
   }, [user, loading]);
 
   return null;
@@ -120,8 +124,9 @@ function RootStack() {
         <Stack.Screen name="edit-profile" options={{ title: "Edit profile", presentation: "modal" }} />
         <Stack.Screen name="paywall" options={{ title: "Upgrade", presentation: "modal" }} />
         <Stack.Screen name="sign-in" options={{ title: "Sign in", presentation: "modal" }} />
-        <Stack.Screen name="compare" options={{ title: "Compare gemstones" }} />
-        <Stack.Screen name="quiz" options={{ title: "Gemstone quiz" }} />
+        <Stack.Screen name="compare" options={{ title: "Compare diamonds" }} />
+        <Stack.Screen name="quiz" options={{ title: "Diamond quiz" }} />
+        <Stack.Screen name="photo-quiz" options={{ title: "Spot the diamond" }} />
         <Stack.Screen name="quiz-history" options={{ title: "Quiz leaderboard" }} />
         <Stack.Screen name="first-aid" options={{ title: "Think you bought a fake?" }} />
         <Stack.Screen name="anatomy" options={{ title: "Anatomy of a diamond" }} />
@@ -146,6 +151,7 @@ export default function RootLayout() {
         <ThemeProvider>
           <AuthProvider>
             <PurchasesBridge />
+            <InAppUpdater />
             <CreditGateProvider>
               <SplashGate>
                 <OnboardingGate>

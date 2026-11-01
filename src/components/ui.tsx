@@ -3,11 +3,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type ImageSourcePropType,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -34,16 +36,19 @@ export function Screen({
   contentStyle?: StyleProp<ViewStyle>;
 }) {
   const { colors } = useTheme();
+  // A little breathing room below the status bar so titles/headers aren't glued
+  // to the very top — only when this screen owns the top edge (no native header).
+  const topPad = edges.includes("top") ? spacing.md : 0;
   const body = scroll ? (
     <ScrollView
-      contentContainerStyle={[{ padding: spacing.lg, paddingBottom: spacing.xxxl }, contentStyle]}
+      contentContainerStyle={[{ padding: spacing.lg, paddingTop: spacing.lg + topPad, paddingBottom: spacing.xxxl }, contentStyle]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
       {children}
     </ScrollView>
   ) : (
-    <View style={[{ flex: 1 }, contentStyle]}>{children}</View>
+    <View style={[{ flex: 1, paddingTop: topPad }, contentStyle]}>{children}</View>
   );
 
   return (
@@ -325,11 +330,14 @@ export function SectionHeader({ title, action }: { title: string; action?: React
 
 export function EmptyState({
   icon,
+  image,
   title,
   body,
   action,
 }: {
   icon: IconName;
+  /** Optional illustration shown instead of the icon circle (transparent PNG). */
+  image?: ImageSourcePropType;
   title: string;
   body: string;
   action?: React.ReactNode;
@@ -337,9 +345,13 @@ export function EmptyState({
   const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <View style={[styles.emptyIcon, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-        <Feather name={icon} size={26} color={colors.textMuted} />
-      </View>
+      {image ? (
+        <Image source={image} style={styles.emptyImage} resizeMode="contain" />
+      ) : (
+        <View style={[styles.emptyIcon, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+          <Feather name={icon} size={26} color={colors.textMuted} />
+        </View>
+      )}
       <ThemedText variant="heading" style={{ textAlign: "center" }}>
         {title}
       </ThemedText>
@@ -406,6 +418,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   empty: { alignItems: "center", gap: spacing.md, paddingVertical: spacing.xxxl },
+  emptyImage: { width: 128, height: 128 },
   emptyIcon: {
     width: 68,
     height: 68,

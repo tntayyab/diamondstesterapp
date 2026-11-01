@@ -12,6 +12,8 @@ import { env } from "@/config/env";
 
 export interface PurchasePackage {
   identifier: string;
+  /** Underlying store product id (e.g. "diamondstester_adfree") — used to pick the Ad-Free package by id. */
+  productId: string;
   title: string;
   priceString: string;
   description: string;
@@ -99,7 +101,7 @@ interface RawOfferings {
 
 interface RawPackage {
   identifier: string;
-  product?: { title?: string; priceString?: string; description?: string };
+  product?: { identifier?: string; title?: string; priceString?: string; description?: string };
 }
 
 /** Packages in the configured offering, or `[]` when billing is unavailable. */
@@ -115,6 +117,7 @@ export async function getPackages(): Promise<{ packages: PurchasePackage[]; raw:
     return {
       packages: raw.map((pkg) => ({
         identifier: pkg.identifier,
+        productId: pkg.product?.identifier ?? "",
         title: pkg.product?.title ?? pkg.identifier,
         priceString: pkg.product?.priceString ?? "",
         description: pkg.product?.description ?? "",
@@ -130,25 +133,60 @@ interface RawCustomerInfo {
   entitlements?: { active?: Record<string, unknown> };
 }
 
-function hasEntitlement(info: unknown): boolean {
+/** True when the given named entitlement is currently active. */
+function hasNamedEntitlement(info: unknown, name: string): boolean {
   const active = (info as RawCustomerInfo)?.entitlements?.active ?? {};
-  return Boolean(active[env.purchases.entitlement]);
+  return Boolean(active[name]);
 }
 
-/** Returns true when the purchase completed and the entitlement is now active. */
+/** The credit "pro" entitlement (Starter/Explorer/Pro) — grants credits, not ad removal. */
+function hasEntitlement(info: unknown): boolean {
+  return hasNamedEntitlement(info, env.purchases.entitlement);
+}
+
+/**
+ * Whether the separate Ad-Free entitlement is active. This is what gates ads —
+ * deliberately independent of the credit `pro` entitlement, so only the Ad-Free
+ * subscription removes ads. Reads live from RevenueCat; grants no credits, so
+ * there is no server/profile state to keep in sync.
+ *
+ * Tri-state on purpose:
+ *   true  — entitlement is definitely active
+ *   false — entitlement is definitely NOT active (a trustworthy read said so)
+ *   null  — we could not determine it (web / Expo Go / not configured yet, or a
+ *           transient getCustomerInfo() failure). Callers MUST treat `null` as
+ *           "keep whatever you already knew" and never revoke ad-free on it — a
+ *           paying subscriber must not start seeing ads because of a network
+ *           blip during a background re-check.
+ */
+export async function isAdFree(): Promise<boolean | null> {
+  const Purchases = loadPurchases();
+  if (!Purchases || !nativeReady) return null;
+  try {
+    return hasNamedEntitlement(await Purchases.getCustomerInfo(), env.purchases.adfreeEntitlement);
+  } catch {
+    return null;
+  }
+}
+
+/** Returns true when the purchase completed and its entitlement (pro OR ad-free) is now active. */
 export async function purchase(rawPackage: unknown): Promise<boolean> {
   const Purchases = loadPurchases();
   if (!Purchases || !nativeReady) return false;
 
   const outcome = (await Purchases.purchasePackage(rawPackage)) as { customerInfo?: unknown };
-  return hasEntitlement(outcome.customerInfo);
+  return (
+    hasEntitlement(outcome.customerInfo) ||
+    hasNamedEntitlement(outcome.customerInfo, env.purchases.adfreeEntitlement)
+  );
 }
 
 export async function restore(): Promise<boolean> {
   const Purchases = loadPurchases();
   if (!Purchases || !nativeReady) return false;
 
-  return hasEntitlement(await Purchases.restorePurchases());
+  const info = await Purchases.restorePurchases();
+  return hasEntitlement(info) || hasNamedEntitlement(info, env.purchases.adfreeEntitlement);
 }
 
 export async function isSubscribed(): Promise<boolean> {

@@ -71,6 +71,14 @@ export const env = {
     iosKey: revenueCatIos,
     androidKey: revenueCatAndroid,
     entitlement: text(process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT, "pro"),
+    /**
+     * Separate entitlement for the cheap "Ad-Free" add-on. It is intentionally
+     * NOT the credit `entitlement` above: only this one removes ads, so the
+     * credit plans (Starter/Explorer/Pro) still show ads unless the user also
+     * buys Ad-Free. Ads are gated on this entitlement, read live from RevenueCat
+     * (no server state needed since it grants no credits).
+     */
+    adfreeEntitlement: text(process.env.EXPO_PUBLIC_REVENUECAT_ADFREE_ENTITLEMENT, "adfree"),
     offering: text(process.env.EXPO_PUBLIC_REVENUECAT_OFFERING, "default"),
     configured: Boolean(revenueCatIos || revenueCatAndroid),
   },

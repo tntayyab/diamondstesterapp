@@ -1,21 +1,15 @@
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { showAlert } from "@/components/AppAlert";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 
-import { Button, Card, Screen, SectionHeader, ThemedText } from "@/components/ui";
-import {
-  freeTier,
-  pricingFaqs,
-  pricingHeadline,
-  pricingHowItWorks,
-  pricingPromo,
-  pricingSub,
-  pricingTiers,
-  pricingTrust,
-} from "@/content/pricing";
+import { showAlert } from "@/components/AppAlert";
+import { ScreenHero } from "@/components/ScreenHero";
+import { Screen, ThemedText } from "@/components/ui";
+import { appImages } from "@/content/appImages";
+import { env } from "@/config/env";
+import { adFreeTier, freeTier, pricingTiers } from "@/content/pricing";
+import { refreshAdFree, useAdFree } from "@/lib/adFree";
 import { useAuth } from "@/lib/auth";
 import { success, tap } from "@/lib/feedback";
 import {
@@ -25,18 +19,54 @@ import {
   restore,
   type PurchasePackage,
 } from "@/lib/purchases";
-import { brandGradient, radius, spacing, useTheme } from "@/theme";
+import { radius, spacing, useTheme, withAlpha } from "@/theme";
+
+// Seconds before the close (X) button becomes tappable — a gentle cooldown that
+// nudges the user to read the offer first (ported from the SwiftUI PurchaseView).
+const COOLDOWN_SECONDS = 3;
+
+/** A row on the paywall: a credit tier, or the standalone Ad-Free add-on. */
+interface PlanRow {
+  kind: "credit" | "adfree";
+  name: string;
+  firstMonth: number;
+  regular: number;
+  highlighted: boolean;
+  subLine: string;
+  /** The RevenueCat package to purchase, or undefined until offerings load. */
+  raw: unknown;
+  priceString?: string;
+}
+
+// Premium benefits shown under the hero. Kept accurate to what a paid plan gives.
+const PREMIUM_FEATURES: { icon: React.ComponentProps<typeof Feather>["name"]; title: string }[] = [
+  { icon: "zap", title: "Full AI diamond & gemstone testing" },
+  { icon: "refresh-cw", title: "Fresh scan credits every month" },
+  { icon: "shield", title: "Simulant alerts — moissanite, CZ & more" },
+  { icon: "award", title: "Priority AI · faster, sharper results" },
+];
 
 export default function PaywallScreen() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
+  const adFree = useAdFree();
+  const currentPlan = (profile?.plan ?? "free").toLowerCase();
+
+  /** Does this plan row match what the user already has active this month? */
+  const isCurrent = (plan: PlanRow) =>
+    plan.kind === "adfree" ? adFree : currentPlan !== "free" && currentPlan === plan.name.toLowerCase();
 
   const [packages, setPackages] = useState<PurchasePackage[]>([]);
   const [rawPackages, setRawPackages] = useState<unknown[]>([]);
-  const [busy, setBusy] = useState<string | null>(null);
+  // Default selection: the "most popular" (highlighted) tier, else the middle one.
+  const [selected, setSelected] = useState(() => {
+    const i = pricingTiers.findIndex((t) => t.highlighted);
+    return i >= 0 ? i : Math.min(1, pricingTiers.length - 1);
+  });
+  const [busy, setBusy] = useState(false);
   const [unavailable, setUnavailable] = useState<string | null>(billingUnavailableReason());
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [canClose, setCanClose] = useState(false);
 
   useEffect(() => {
     void getPackages().then(({ packages: list, raw }) => {
@@ -46,276 +76,339 @@ export default function PaywallScreen() {
     });
   }, []);
 
-  const buy = useCallback(
-    async (index: number) => {
-      if (!user) {
-        showAlert("Sign in first", "Create an account so your subscription follows you across devices.", [
-          { text: "Cancel", style: "cancel" },
-          { text: "Sign in", onPress: () => router.replace("/sign-in") },
-        ]);
-        return;
-      }
+  // Reveal the close button after a short cooldown.
+  useEffect(() => {
+    const t = setTimeout(() => setCanClose(true), COOLDOWN_SECONDS * 1000);
+    return () => clearTimeout(t);
+  }, []);
 
-      setBusy(packages[index]?.identifier ?? null);
-      try {
-        if (await purchase(rawPackages[index])) {
-          success();
+  // The plans shown on the paywall: the three credit tiers plus the standalone
+  // Ad-Free add-on. Every row is matched to its RevenueCat package by PRODUCT ID
+  // ("diamonds_starter/explorer/pro", "adfree") rather than by position, so
+  // re-ordering the packages in the RevenueCat dashboard can never mismatch a
+  // plan's price/credits. Each falls back to its index if the id isn't found
+  // (e.g. in Expo Go where no packages load).
+  const plans = useMemo<PlanRow[]>(() => {
+    const idxByProduct = (needle: string, fallback: number) => {
+      const found = packages.findIndex((p) => `${p.productId} ${p.identifier}`.toLowerCase().includes(needle));
+      return found >= 0 ? found : fallback;
+    };
+
+    const rows: PlanRow[] = pricingTiers.map((tier, i) => {
+      const idx = idxByProduct(`diamonds_${tier.name.toLowerCase()}`, i);
+      return {
+        kind: "credit",
+        name: tier.name,
+        firstMonth: tier.firstMonth,
+        regular: tier.regular,
+        highlighted: Boolean(tier.highlighted),
+        subLine: `${tier.ids} · ${tier.credits} credits`,
+        raw: rawPackages[idx] as unknown,
+        priceString: packages[idx]?.priceString,
+      };
+    });
+
+    const adIdx = packages.findIndex((p) => /ad[\s._-]?free/i.test(`${p.productId} ${p.identifier}`));
+    const idx = adIdx >= 0 ? adIdx : pricingTiers.length;
+    rows.push({
+      kind: "adfree",
+      name: adFreeTier.name,
+      firstMonth: adFreeTier.firstMonth,
+      regular: adFreeTier.regular,
+      highlighted: false,
+      subLine: "Removes all ads · no scan credits",
+      raw: rawPackages[idx] as unknown,
+      priceString: packages[idx]?.priceString,
+    });
+
+    return rows;
+  }, [packages, rawPackages]);
+
+  const buy = useCallback(async () => {
+    if (!user) {
+      showAlert("Sign in first", "Create an account so your plan follows you across devices.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Sign in", onPress: () => router.replace("/sign-in") },
+      ]);
+      return;
+    }
+    const row = plans[selected];
+    if (!row?.raw) return;
+    // Already own this exact plan this month — don't let them pay twice for it.
+    const rowIsCurrent = row.kind === "adfree" ? adFree : currentPlan !== "free" && currentPlan === row.name.toLowerCase();
+    if (rowIsCurrent) {
+      showAlert(
+        "You already have this",
+        row.kind === "adfree"
+          ? "Ad-Free is already active on your account. Manage it anytime in Google Play → Subscriptions."
+          : `You're already on the ${row.name} plan this month. Pick a different plan to switch, or manage it in Google Play → Subscriptions.`,
+      );
+      return;
+    }
+    setBusy(true);
+    try {
+      if (await purchase(row.raw)) {
+        success();
+        if (row.kind === "adfree") {
+          await refreshAdFree();
+          showAlert("You're ad-free 🎉", "Banner and full-screen ads are now switched off. Enjoy!");
+        } else {
           await refreshProfile();
-          showAlert("Welcome aboard", "Your plan is active. Fresh credits are on your account.");
-          router.back();
+          showAlert("Welcome to Pro", "Your plan is active — fresh credits are on your account.");
         }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "";
-        if (!/cancel/i.test(message)) showAlert("Purchase failed", message || "Please try again.");
-      } finally {
-        setBusy(null);
+        router.back();
       }
-    },
-    [user, packages, rawPackages, refreshProfile, router],
-  );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (!/cancel/i.test(message)) showAlert("Purchase failed", message || "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }, [user, plans, selected, refreshProfile, router, adFree, currentPlan]);
 
   const handleRestore = useCallback(async () => {
-    setBusy("restore");
+    setBusy(true);
     try {
       const restored = await restore();
       await refreshProfile();
+      await refreshAdFree();
       showAlert(
         restored ? "Purchases restored" : "Nothing to restore",
-        restored ? "Your plan is active again." : "We could not find an active subscription for this account.",
+        restored ? "Your plan is active again." : "No active subscription found for this account.",
       );
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   }, [refreshProfile]);
 
+  const openTerms = useCallback(() => {
+    showAlert("Terms & Privacy", "Open on diamondstester.com?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Privacy", onPress: () => void Linking.openURL(`${env.app.siteUrl}/privacy`) },
+      { text: "Terms", onPress: () => void Linking.openURL(`${env.app.siteUrl}/terms`) },
+    ]);
+  }, []);
+
+  const selectedPlan = plans[selected];
+  const blocked = busy || Boolean(unavailable) || !selectedPlan?.raw;
+  const ctaLabel = busy ? "Please wait…" : `Get ${selectedPlan?.name ?? "Pro"}`;
+
   return (
-    <Screen scroll edges={["bottom"]}>
-      {/* Hero — headline + promo chips, exactly as on the website */}
-      <LinearGradient
-        colors={[...brandGradient]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.hero}
-      >
-        <Feather name="zap" size={26} color="#fff" />
-        <ThemedText variant="title" color="#fff" style={{ textAlign: "center", marginTop: spacing.sm }}>
-          {pricingHeadline}
-        </ThemedText>
-        <ThemedText variant="caption" color="rgba(255,255,255,0.9)" style={{ textAlign: "center" }}>
-          {pricingSub}
-        </ThemedText>
-        <View style={styles.promoRow}>
-          {pricingPromo.map((item) => (
-            <View key={item} style={styles.promoChip}>
-              <Feather name="check" size={11} color="#fff" />
-              <ThemedText variant="caption" color="#fff" style={{ fontSize: 11, fontWeight: "600" }}>
-                {item}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-      </LinearGradient>
+    <Screen scroll edges={["top", "bottom"]}>
+      {/* Close — cooldown ring first, then a tappable X */}
+      <View style={styles.closeRow}>
+        {canClose ? (
+          <Pressable
+            onPress={() => {
+              tap();
+              router.back();
+            }}
+            hitSlop={14}
+            style={styles.closeBtn}
+          >
+            <Feather name="x" size={22} color={colors.textMuted} />
+          </Pressable>
+        ) : (
+          <View style={styles.closeBtn}>
+            <Feather name="circle" size={18} color={withAlpha(colors.textFaint, 0.35)} />
+          </View>
+        )}
+      </View>
+
+      {/* Hero — premium diamond banner */}
+      <ScreenHero image={appImages.paywallHero} height={170} />
+      <ThemedText variant="title" style={{ textAlign: "center", fontSize: 28 }}>
+        Unlock Premium Access
+      </ThemedText>
+
+      {/* Features */}
+      <View style={{ gap: spacing.md, marginTop: spacing.xl, paddingHorizontal: spacing.sm }}>
+        {PREMIUM_FEATURES.map((f) => (
+          <View key={f.title} style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+            <Feather name={f.icon} size={22} color={colors.tint} />
+            <ThemedText variant="body" style={{ flex: 1 }}>
+              {f.title}
+            </ThemedText>
+          </View>
+        ))}
+      </View>
 
       {unavailable ? (
-        <Card style={{ marginTop: spacing.lg }}>
-          <View style={{ flexDirection: "row", gap: spacing.md }}>
-            <Feather name="info" size={18} color={colors.textMuted} />
-            <ThemedText variant="caption" muted style={{ flex: 1 }}>
-              {unavailable}
-            </ThemedText>
-          </View>
-        </Card>
+        <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+          <Feather name="info" size={16} color={colors.textMuted} />
+          <ThemedText variant="caption" muted style={{ flex: 1 }}>
+            {unavailable}
+          </ThemedText>
+        </View>
       ) : null}
 
-      <SectionHeader title="Plans" />
+      {/* Current subscription status */}
+      {currentPlan !== "free" || adFree ? (
+        <View style={[styles.currentBar, { backgroundColor: withAlpha(colors.tint, 0.08), borderColor: withAlpha(colors.tint, 0.3) }]}>
+          <Feather name="check-circle" size={16} color={colors.tint} />
+          <ThemedText variant="caption" style={{ flex: 1 }}>
+            You&apos;re subscribed this month
+            {currentPlan !== "free" ? ` · ${currentPlan[0].toUpperCase()}${currentPlan.slice(1)} plan` : ""}
+            {adFree ? " · Ad-Free" : ""}. Pick another plan below to switch.
+          </ThemedText>
+        </View>
+      ) : null}
 
-      {pricingTiers.map((tier, index) => {
-        const pkg = packages[index];
-        const canBuy = !unavailable && Boolean(pkg);
-
-        return (
-          <Card
-            key={tier.name}
-            style={[
-              { marginBottom: spacing.md },
-              tier.highlighted ? { borderColor: colors.tint, borderWidth: 1.5 } : null,
-            ]}
-          >
-            {tier.highlighted ? (
-              <View style={[styles.ribbon, { backgroundColor: colors.tint }]}>
-                <ThemedText variant="label" color="#fff" style={{ fontSize: 10 }}>
-                  Most popular
+      {/* Selectable plans */}
+      <View style={{ gap: spacing.md, marginTop: spacing.xl }}>
+        {plans.map((plan, i) => {
+          const isSel = selected === i;
+          return (
+            <Pressable
+              key={plan.name}
+              onPress={() => {
+                tap();
+                setSelected(i);
+              }}
+              style={[
+                styles.plan,
+                {
+                  borderColor: isSel ? colors.tint : colors.cardBorder,
+                  backgroundColor: isSel ? withAlpha(colors.tint, 0.06) : colors.card,
+                },
+              ]}
+            >
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                  <ThemedText variant="heading" style={{ fontSize: 17 }}>
+                    {plan.name}
+                  </ThemedText>
+                  {isCurrent(plan) ? (
+                    <View style={[styles.badge, { backgroundColor: withAlpha("#22c55e", 0.18) }]}>
+                      <ThemedText variant="label" color="#22c55e" style={{ fontSize: 10 }}>
+                        CURRENT
+                      </ThemedText>
+                    </View>
+                  ) : plan.highlighted ? (
+                    <View style={[styles.badge, { backgroundColor: colors.tint }]}>
+                      <ThemedText variant="label" color="#fff" style={{ fontSize: 10 }}>
+                        POPULAR
+                      </ThemedText>
+                    </View>
+                  ) : plan.kind === "adfree" ? (
+                    <View style={[styles.badge, { backgroundColor: withAlpha(colors.tint, 0.16) }]}>
+                      <ThemedText variant="label" color={colors.tint} style={{ fontSize: 10 }}>
+                        NO ADS
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                </View>
+                <ThemedText variant="caption" muted style={{ marginTop: 3 }}>
+                  {(plan.priceString || `$${plan.firstMonth.toFixed(2)}`)} first month · then $
+                  {plan.regular.toFixed(2)}/mo
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  color={colors.tint}
+                  style={{ marginTop: 2, fontSize: 12, fontWeight: "600" }}
+                >
+                  {plan.subLine}
                 </ThemedText>
               </View>
-            ) : null}
+              <View
+                style={[styles.radio, { borderColor: isSel ? colors.tint : withAlpha(colors.textFaint, 0.4) }]}
+              >
+                {isSel ? (
+                  <View style={[styles.radioDot, { backgroundColor: colors.tint }]}>
+                    <Feather name="check" size={12} color="#fff" />
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
 
-            <ThemedText variant="heading">{tier.name}</ThemedText>
-            <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
-              {tier.audience}
-            </ThemedText>
-
-            {/* First-month price big, regular struck through — same as the site */}
-            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, marginTop: spacing.md }}>
-              <ThemedText variant="title">
-                {pkg?.priceString || `$${tier.firstMonth.toFixed(2)}`}
-              </ThemedText>
-              <ThemedText variant="caption" muted style={{ textDecorationLine: "line-through" }}>
-                ${tier.regular.toFixed(2)}
-              </ThemedText>
-              <ThemedText variant="caption" muted>
-                first month
-              </ThemedText>
-            </View>
-            <ThemedText variant="caption" color={colors.tint} style={{ marginTop: 2, fontWeight: "600" }}>
-              then ${tier.regular.toFixed(2)}/mo · {tier.ids} · {tier.perId}
-            </ThemedText>
-
-            <View style={{ gap: spacing.sm, marginTop: spacing.lg }}>
-              {tier.features.map((feature) => (
-                <View key={feature} style={{ flexDirection: "row", gap: spacing.sm, alignItems: "center" }}>
-                  <Feather name="check" size={14} color={colors.tint} />
-                  <ThemedText variant="caption" style={{ flex: 1 }}>
-                    {feature}
-                  </ThemedText>
-                </View>
-              ))}
-            </View>
-
-            <Button
-              label={canBuy ? "Start 7-day free trial" : "Unavailable"}
-              variant={tier.highlighted ? "primary" : "secondary"}
-              disabled={!canBuy}
-              loading={busy === pkg?.identifier}
-              onPress={() => void buy(index)}
-              style={{ marginTop: spacing.lg }}
-            />
-          </Card>
-        );
-      })}
-
-      {/* Free tier note */}
-      <Card style={{ marginBottom: spacing.md }}>
-        <ThemedText variant="body" style={{ fontWeight: "700" }}>
-          {freeTier.name}
+      {/* Call to action */}
+      <Pressable
+        onPress={buy}
+        disabled={blocked}
+        style={({ pressed }) => [
+          styles.cta,
+          { backgroundColor: colors.tint, opacity: blocked ? 0.5 : pressed ? 0.9 : 1 },
+        ]}
+      >
+        <ThemedText variant="body" color="#fff" style={{ fontWeight: "800", fontSize: 17 }}>
+          {ctaLabel}
         </ThemedText>
-        <ThemedText variant="caption" muted style={{ marginTop: 4 }}>
-          {freeTier.blurb}
-        </ThemedText>
-      </Card>
+        {!busy ? <Feather name="chevron-right" size={20} color="#fff" /> : null}
+      </Pressable>
 
-      <Button
-        label="Restore purchases"
-        variant="ghost"
-        loading={busy === "restore"}
-        disabled={Boolean(unavailable)}
-        onPress={handleRestore}
-      />
+      <ThemedText variant="caption" muted style={{ textAlign: "center", marginTop: spacing.sm, fontSize: 11 }}>
+        {freeTier.blurb}
+      </ThemedText>
 
-      {/* How it works */}
-      <SectionHeader title="How it works" />
-      {pricingHowItWorks.map((step) => (
-        <View key={step.step} style={styles.step}>
-          <View style={[styles.stepNum, { borderColor: colors.cardBorder }]}>
-            <ThemedText variant="caption" color={colors.tint} style={{ fontWeight: "800" }}>
-              {step.step}
-            </ThemedText>
-          </View>
-          <View style={{ flex: 1 }}>
-            <ThemedText variant="body" style={{ fontWeight: "600" }}>
-              {step.title}
-            </ThemedText>
-            <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
-              {step.desc}
-            </ThemedText>
-          </View>
-        </View>
-      ))}
-
-      {/* FAQ */}
-      <SectionHeader title="Frequently asked" />
-      {pricingFaqs.map((faq, index) => {
-        const open = openFaq === index;
-        return (
-          <Card key={faq.q} onPress={() => {
-            tap();
-            setOpenFaq(open ? null : index);
-          }} style={{ marginBottom: spacing.sm }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
-              <ThemedText variant="body" style={{ flex: 1, fontWeight: "600" }}>
-                {faq.q}
-              </ThemedText>
-              <Feather name={open ? "chevron-up" : "chevron-down"} size={18} color={colors.textFaint} />
-            </View>
-            {open ? (
-              <ThemedText variant="caption" muted style={{ marginTop: spacing.md }}>
-                {faq.a}
-              </ThemedText>
-            ) : null}
-          </Card>
-        );
-      })}
-
-      {/* Trust */}
-      <View style={styles.trust}>
-        <View style={styles.methods}>
-          {pricingTrust.methods.map((method) => (
-            <View key={method} style={[styles.method, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-              <ThemedText variant="caption" muted style={{ fontSize: 11 }}>
-                {method}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-        <ThemedText variant="caption" muted style={{ textAlign: "center", fontSize: 11, marginTop: spacing.md }}>
-          {pricingTrust.note}
-        </ThemedText>
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Pressable onPress={handleRestore} disabled={busy}>
+          <ThemedText variant="caption" muted style={styles.link}>
+            Restore
+          </ThemedText>
+        </Pressable>
+        <Pressable onPress={openTerms}>
+          <ThemedText variant="caption" muted style={styles.link}>
+            Terms &amp; Privacy
+          </ThemedText>
+        </Pressable>
       </View>
 
       <ThemedText variant="caption" muted style={styles.legal}>
-        Subscriptions renew automatically until cancelled. Manage or cancel any time in your App Store or
-        Google Play account settings. Prices shown are set in the store and may vary by region.
+        Subscriptions renew automatically until cancelled — manage or cancel anytime in Google Play. Your
+        first month is 50% off, then the regular monthly rate applies. Prices are set in the store and may
+        vary by region.
       </ThemedText>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { borderRadius: radius.xl, padding: spacing.xl, alignItems: "center", gap: spacing.xs, marginTop: spacing.lg },
-  promoRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, justifyContent: "center", marginTop: spacing.md },
-  promoChip: {
+  closeRow: { flexDirection: "row", justifyContent: "flex-end", minHeight: 30 },
+  closeBtn: { width: 30, height: 30, alignItems: "center", justifyContent: "center" },
+  notice: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  ribbon: {
-    position: "absolute",
-    top: -1,
-    right: spacing.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 3,
-    borderBottomLeftRadius: radius.sm,
-    borderBottomRightRadius: radius.sm,
-  },
-  step: { flexDirection: "row", gap: spacing.md, marginBottom: spacing.lg, alignItems: "flex-start" },
-  stepNum: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    gap: spacing.sm,
     borderWidth: StyleSheet.hairlineWidth * 2,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginTop: spacing.lg,
+  },
+  currentBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginTop: spacing.lg,
+  },
+  plan: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    borderWidth: 1.5,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+  },
+  badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.sm },
+  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  radioDot: { width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  cta: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: spacing.sm,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
+    marginTop: spacing.xl,
   },
-  trust: { marginTop: spacing.xl },
-  methods: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, justifyContent: "center" },
-  method: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: radius.sm,
-    borderWidth: StyleSheet.hairlineWidth * 2,
-  },
+  footer: { flexDirection: "row", justifyContent: "center", gap: spacing.xl, marginTop: spacing.lg },
+  link: { textDecorationLine: "underline", fontSize: 13 },
   legal: { marginTop: spacing.lg, fontSize: 11, lineHeight: 16, textAlign: "center" },
 });

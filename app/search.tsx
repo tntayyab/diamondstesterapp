@@ -4,6 +4,7 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 import { SpeciesCard } from "@/components/SpeciesCard";
 import { Card, EmptyState, Screen, SectionHeader, ThemedText } from "@/components/ui";
+import { appImages } from "@/content/appImages";
 import { searchGuides } from "@/content/guides";
 import { searchSpecies } from "@/content/species";
 import { fontSize, radius, spacing, useTheme } from "@/theme";
@@ -38,7 +39,7 @@ export default function SearchScreen() {
           body="Species names, scientific names, families, regions and every field guide — all bundled and offline."
         />
       ) : total === 0 ? (
-        <EmptyState icon="search" title="No matches" body={`Nothing in the library matches “${trimmed}”.`} />
+        <EmptyState icon="search" image={appImages.emptySearch} title="No matches" body={`Nothing in the library matches “${trimmed}”.`} />
       ) : (
         <>
           {species.length > 0 ? (

@@ -1,14 +1,15 @@
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { AdBanner } from "@/components/AdBanner";
 import { FilterDropdown } from "@/components/FilterDropdown";
 import { HamburgerButton } from "@/components/HamburgerButton";
 import { Card, EmptyState, Screen, ThemedText } from "@/components/ui";
+import { env } from "@/config/env";
 import { fetchBlogPosts, type BlogPost } from "@/lib/blog";
 import { timeAgo } from "@/lib/format";
 import { brandGradient, fontSize, radius, spacing, useTheme } from "@/theme";
@@ -23,8 +24,13 @@ function optionsFor(posts: BlogPost[], field: "category" | "difficulty" | "topic
   return [allLabel, ...Array.from(seen).sort()];
 }
 
+/** Open an article on diamondstester.com (drives traffic to the site instead of
+ *  reading it in-app). */
+function openArticle(slug: string) {
+  void Linking.openURL(`${env.app.siteUrl}/blog/${slug}`);
+}
+
 export default function BlogScreen() {
-  const router = useRouter();
   const { colors } = useTheme();
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -76,6 +82,16 @@ export default function BlogScreen() {
   const featured = visible.find((p) => p.featured) ?? visible[0];
   const rest = visible.filter((p) => p.slug !== featured?.slug);
 
+  // Interleave a banner ad after every 2 articles in the list (like Community).
+  const rows = useMemo<({ kind: "post"; post: BlogPost } | { kind: "ad"; id: string })[]>(() => {
+    const out: ({ kind: "post"; post: BlogPost } | { kind: "ad"; id: string })[] = [];
+    rest.forEach((post, i) => {
+      out.push({ kind: "post", post });
+      if ((i + 1) % 2 === 0) out.push({ kind: "ad", id: `ad-${post.slug}` });
+    });
+    return out;
+  }, [rest]);
+
   const header = (
     <View>
       <View style={styles.titleRow}>
@@ -123,7 +139,7 @@ export default function BlogScreen() {
 
       {/* Featured */}
       {featured ? (
-        <Pressable onPress={() => router.push(`/blog-post/${featured.slug}`)} style={{ marginTop: spacing.lg }}>
+        <Pressable onPress={() => openArticle(featured.slug)} style={{ marginTop: spacing.lg }}>
           <Card style={{ padding: 0, overflow: "hidden" }}>
             <BlogCover post={featured} height={190} />
             <View style={{ padding: spacing.lg }}>
@@ -157,44 +173,54 @@ export default function BlogScreen() {
     <Screen edges={["top"]}>
       <FlatList
         style={{ flex: 1 }}
-        data={rest}
-        keyExtractor={(post) => post.slug}
+        data={rows}
+        keyExtractor={(row) => (row.kind === "post" ? row.post.slug : row.id)}
         ListHeaderComponent={header}
-        renderItem={({ item }) => (
-          <Card
-            onPress={() => router.push(`/blog-post/${item.slug}`)}
-            style={{ marginBottom: spacing.md, padding: 0, overflow: "hidden" }}
-          >
-            <BlogCover post={item} height={150} />
-            <View style={{ padding: spacing.lg }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                {item.category ? (
-                  <ThemedText variant="label" color={colors.tint}>
-                    {item.category}
+        renderItem={({ item }) => {
+          if (item.kind === "ad") {
+            return (
+              <View style={{ marginBottom: spacing.md }}>
+                <AdBanner />
+              </View>
+            );
+          }
+          const post = item.post;
+          return (
+            <Card
+              onPress={() => openArticle(post.slug)}
+              style={{ marginBottom: spacing.md, padding: 0, overflow: "hidden" }}
+            >
+              <BlogCover post={post} height={150} />
+              <View style={{ padding: spacing.lg }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                  {post.category ? (
+                    <ThemedText variant="label" color={colors.tint}>
+                      {post.category}
+                    </ThemedText>
+                  ) : null}
+                  {post.read_minutes ? (
+                    <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
+                      · {post.read_minutes} min read
+                    </ThemedText>
+                  ) : null}
+                </View>
+                <ThemedText variant="heading" style={{ marginTop: spacing.sm, fontSize: 17 }}>
+                  {post.title}
+                </ThemedText>
+                {post.excerpt ? (
+                  <ThemedText variant="caption" muted numberOfLines={2} style={{ marginTop: 4 }}>
+                    {post.excerpt}
                   </ThemedText>
                 ) : null}
-                {item.read_minutes ? (
-                  <ThemedText variant="caption" muted style={{ fontSize: 12 }}>
-                    · {item.read_minutes} min read
+                {post.published_at ? (
+                  <ThemedText variant="caption" muted style={{ fontSize: 11, marginTop: 6 }}>
+                    {timeAgo(post.published_at)}
                   </ThemedText>
                 ) : null}
               </View>
-              <ThemedText variant="heading" style={{ marginTop: spacing.sm, fontSize: 17 }}>
-                {item.title}
-              </ThemedText>
-              {item.excerpt ? (
-                <ThemedText variant="caption" muted numberOfLines={2} style={{ marginTop: 4 }}>
-                  {item.excerpt}
-                </ThemedText>
-              ) : null}
-              {item.published_at ? (
-                <ThemedText variant="caption" muted style={{ fontSize: 11, marginTop: 6 }}>
-                  {timeAgo(item.published_at)}
-                </ThemedText>
-              ) : null}
-            </View>
-          </Card>
-        )}
+            </Card>
+          );
+        }}
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -205,7 +231,6 @@ export default function BlogScreen() {
           )
         }
       />
-      <AdBanner />
     </Screen>
   );
 }

@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/ui";
 import { env } from "@/config/env";
 import { adsAvailable, bannerComponents, bannerUnitId } from "@/lib/ads";
+import { useAdFree } from "@/lib/adFree";
 import { tap } from "@/lib/feedback";
 import { spacing, useTheme, withAlpha } from "@/theme";
 
@@ -40,7 +41,7 @@ function HouseBanner() {
     >
       <Feather name="zap" size={16} color={colors.tint} />
       <ThemedText variant="caption" style={{ flex: 1, fontWeight: "600" }} numberOfLines={1}>
-        Diamonds Tester Pro — remove ads & get unlimited scans
+        Go ad-free — remove every ad from $2.99/mo
       </ThemedText>
       <Feather name="arrow-right" size={15} color={colors.tint} />
     </Pressable>
@@ -55,10 +56,11 @@ function HouseBanner() {
  * layout never jumps once real ads are wired in later.
  */
 export function AdBanner() {
-  // Master ads switch off → render nothing at all (no real ad, no house ad).
-  // Checked before any hook so the (build-constant) condition can't change
-  // hook order between renders.
-  if (!env.ads.enabled) return null;
+  // `useAdFree` (an external-store hook) runs unconditionally so hook order is
+  // stable; the render then bails when ads are off globally OR this user holds
+  // the Ad-Free entitlement.
+  const adFree = useAdFree();
+  if (!env.ads.enabled || adFree) return null;
   return <AdBannerInner />;
 }
 

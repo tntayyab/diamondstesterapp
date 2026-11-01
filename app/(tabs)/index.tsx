@@ -10,8 +10,11 @@ import { AdBanner } from "@/components/AdBanner";
 import { showAlert } from "@/components/AppAlert";
 import { useCreditGate } from "@/components/CreditGate";
 import { HamburgerButton } from "@/components/HamburgerButton";
+import { HeroSlider } from "@/components/HeroSlider";
 import { ImageStrip } from "@/components/ImageStrip";
+import { FeaturedArticles, LearnCarousels, MoreApps } from "@/components/HomeExtras";
 import { Button, Card, EmptyState, Screen, SectionHeader, ThemedText, AuthenticityBadge } from "@/components/ui";
+import { appImages, heroSlides } from "@/content/appImages";
 import { env } from "@/config/env";
 import { howItWorks } from "@/content/reference";
 import { scansRemaining, useAuth } from "@/lib/auth";
@@ -144,16 +147,17 @@ export default function ScanScreen() {
   const guestLeft = Math.max(0, env.app.guestFreeScans - guestUsed);
 
   return (
-    <Screen scroll>
+    <Screen>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.xxxl }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.header}>
         <HamburgerButton />
         <View style={{ flex: 1 }}>
-          <ThemedText variant="label" muted>
-            Diamonds Tester
-          </ThemedText>
-          <ThemedText variant="title" style={{ marginTop: 2 }}>
-            Scan a diamond or gemstone
-          </ThemedText>
+          <ThemedText variant="title">Diamonds Tester</ThemedText>
         </View>
         <Pressable onPress={() => router.push("/search")} hitSlop={10}>
           <Feather name="search" size={22} color={colors.textMuted} />
@@ -182,14 +186,16 @@ export default function ScanScreen() {
         </View>
       </Card>
 
-      {/* Capture surface */}
-      <LinearGradient
-        colors={[...brandGradient]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.capture}
-      >
-        {busy && preview ? (
+      {/* Capture surface — a swipeable slider of real diamond photos behind the
+          prompt when idle; a solid brand gradient with the live preview while
+          a scan is analysing. */}
+      {busy && preview ? (
+        <LinearGradient
+          colors={[...brandGradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.capture}
+        >
           <View style={styles.captureInner}>
             <Image source={{ uri: preview }} style={styles.previewImage} contentFit="cover" />
             <ThemedText variant="heading" color="#fff" style={{ marginTop: spacing.lg }}>
@@ -199,20 +205,22 @@ export default function ScanScreen() {
               Reading facet pattern, brilliance, inclusions and colour
             </ThemedText>
           </View>
-        ) : (
+        </LinearGradient>
+      ) : (
+        <HeroSlider images={heroSlides} style={[styles.capture, { padding: 0 }]}>
           <View style={styles.captureInner}>
             <View style={styles.captureIcon}>
               <Feather name="camera" size={30} color="#fff" />
             </View>
-            <ThemedText variant="heading" color="#fff">
+            <ThemedText variant="heading" color="#fff" style={{ textAlign: "center" }}>
               Point, shoot, get an estimate
             </ThemedText>
             <ThemedText variant="caption" color="rgba(255,255,255,0.85)" style={{ textAlign: "center" }}>
               Bright, even light and a close-up on the stone give the most useful result.
             </ThemedText>
           </View>
-        )}
-      </LinearGradient>
+        </HeroSlider>
+      )}
 
       {images.length > 0 ? (
         <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
@@ -262,7 +270,11 @@ export default function ScanScreen() {
         <Tool icon="book-open" label="Guides" onPress={() => router.push("/guides")} />
         <Tool icon="git-merge" label="Compare" onPress={() => router.push("/compare")} />
         <Tool icon="award" label="Quiz" onPress={() => router.push("/quiz")} />
+        <Tool icon="image" label="Photo quiz" onPress={() => router.push("/photo-quiz")} />
       </ScrollView>
+
+      {/* Latest from the website — auto-scrolling; each card opens diamondstester.com */}
+      <FeaturedArticles />
 
       {/* Recent scans */}
       <SectionHeader
@@ -281,6 +293,7 @@ export default function ScanScreen() {
       {recent.length === 0 ? (
         <EmptyState
           icon="camera"
+          image={appImages.emptyScan}
           title="No scans yet"
           body="Photograph a diamond or gemstone and your results will collect here, available offline."
         />
@@ -309,6 +322,9 @@ export default function ScanScreen() {
         ))
       )}
 
+      {/* Explore the library — two auto-scrolling rows drifting opposite ways */}
+      <LearnCarousels />
+
       {/* How it works */}
       <SectionHeader title="How scanning works" />
       {howItWorks.map((step, index) => (
@@ -335,6 +351,11 @@ export default function ScanScreen() {
         manual tests in Guides and a professional appraisal.
       </ThemedText>
 
+      {/* More apps from our store — real Play Store icons, tap to install */}
+      <MoreApps />
+      </ScrollView>
+
+      {/* Sticky banner — pinned above the tab bar, like Learn & Guides */}
       <AdBanner />
     </Screen>
   );

@@ -6,6 +6,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { SpeciesCard } from "@/components/SpeciesCard";
 import { HamburgerButton } from "@/components/HamburgerButton";
 import { EmptyState, Screen, ThemedText } from "@/components/ui";
+import { appImages } from "@/content/appImages";
 import { searchSpecies, speciesLibrary, VENOM_ORDER } from "@/content/species";
 import { tap } from "@/lib/feedback";
 import { fontSize, radius, spacing, useTheme, authenticityColors } from "@/theme";
@@ -42,10 +43,10 @@ export default function SpeciesScreen() {
       <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.lg }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <HamburgerButton />
-          <ThemedText variant="title">Gemstone library</ThemedText>
+          <ThemedText variant="title">Diamond library</ThemedText>
         </View>
         <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
-          {results.length} of {speciesLibrary.length} gemstones · works offline
+          {results.length} of {speciesLibrary.length} diamonds & look-alikes · works offline
         </ThemedText>
 
         <View style={styles.controls}>
@@ -106,6 +107,7 @@ export default function SpeciesScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="search"
+            image={appImages.emptySearch}
             title="No matches"
             body="Try a different name, family or region — or reset the authenticity filter."
           />

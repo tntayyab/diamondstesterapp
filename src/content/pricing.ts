@@ -17,12 +17,12 @@ export interface PricingTier {
   features: string[];
 }
 
-export const pricingHeadline = "Try risk-free for 7 days. Then save 50% on month one.";
+export const pricingHeadline = "Save 50% on your first month. Cancel anytime.";
 
 export const pricingSub =
   "Monthly plans with fresh credits every month. Cancel from your dashboard in one click. 14-day money-back guarantee, no questions asked.";
 
-export const pricingPromo = ["7 days free", "50% off your first month", "14-day money-back", "Cancel anytime"];
+export const pricingPromo = ["50% off your first month", "14-day money-back", "Cancel anytime"];
 
 export const pricingTiers: PricingTier[] = [
   {
@@ -38,7 +38,6 @@ export const pricingTiers: PricingTier[] = [
       "Authenticity confidence on every result",
       "Simulant alerts (moissanite, CZ & more)",
       "120 credits every month",
-      "7-day free trial",
       "Cancel anytime",
     ],
   },
@@ -82,11 +81,34 @@ export const freeTier = {
   blurb: "Get 30 free credits — about 3 scans — with no credit card. Free forever.",
 };
 
+/**
+ * App-only add-on — NOT part of the website's credit-tier list, so it lives
+ * outside `pricingTiers` and doesn't break the content-for-content port above.
+ * A cheap subscription that removes every banner and full-screen ad. It grants
+ * NO scan credits: the user keeps their free daily scans and can still use the
+ * opt-in "watch ad → earn credits" reward. Tied to its own RevenueCat
+ * entitlement (`adfree`), independent of the credit plans.
+ */
+export const adFreeTier = {
+  name: "Ad-Free",
+  audience: "Just want the ads gone",
+  firstMonth: 1.49,
+  regular: 2.99,
+  tagline: "Remove all ads",
+  features: [
+    "No banner ads, anywhere",
+    "No full-screen (interstitial) ads",
+    "Keep your free daily scans",
+    "Still watch-to-earn credits when you want",
+    "Cancel anytime",
+  ],
+};
+
 export const pricingHowItWorks = [
   {
     step: "01",
-    title: "Start your 7-day free trial",
-    desc: "Full plan access with no charges during the trial. Cancel before it ends and you pay nothing.",
+    title: "Pick your plan",
+    desc: "Subscribe in a couple of taps and get full access right away — Starter, Explorer or Pro.",
   },
   {
     step: "02",
@@ -107,12 +129,12 @@ export const pricingHowItWorks = [
 
 export const pricingFaqs = [
   {
-    q: "How does the 7-day free trial work?",
-    a: "You get full access to your chosen plan for 7 days at no charge. Cancel any time before the trial ends and you won't be billed a cent.",
+    q: "When am I charged?",
+    a: "You're charged as soon as you subscribe. Your first month is 50% off, then the regular monthly rate applies — and you can cancel anytime before it renews.",
   },
   {
     q: "How is the 50% first-month discount applied?",
-    a: "It's applied automatically at checkout after your trial — there's no code to enter. Your first paid month is half price, then the regular monthly rate applies.",
+    a: "It's applied automatically at checkout — there's no code to enter. Your first paid month is half price, then the regular monthly rate applies.",
   },
   {
     q: "Can I cancel anytime?",

@@ -3,6 +3,8 @@ import { StyleSheet, TextInput, View } from "react-native";
 
 import { Card, Chip, Screen, SectionHeader, ThemedText } from "@/components/ui";
 import { FilterDropdown } from "@/components/FilterDropdown";
+import { ScreenHero } from "@/components/ScreenHero";
+import { appImages } from "@/content/appImages";
 import { radius, spacing, useTheme } from "@/theme";
 
 const SHAPES = ["Round", "Princess", "Oval", "Cushion", "Emerald", "Pear"] as const;
@@ -66,6 +68,7 @@ export default function CalculatorScreen() {
 
   return (
     <Screen scroll>
+      <ScreenHero image={appImages.scale} />
       <ThemedText variant="title">Value estimator</ThemedText>
       <ThemedText variant="caption" muted style={{ marginTop: 2 }}>
         A rough, ballpark estimate — not an appraisal, quote, or offer to buy or sell.

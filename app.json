@@ -2,7 +2,7 @@
   "expo": {
     "name": "Diamonds Tester",
     "slug": "diamonds-tester",
-    "version": "1.0.0",
+    "version": "1.2.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "diamondstester",
@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.appsgurus24.diamondstester",
-      "versionCode": 1,
+      "versionCode": 7,
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {

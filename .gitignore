@@ -46,3 +46,20 @@ supabase/.branches/
 # generated native folders
 /ios
 /android
+
+# Antigravity Build and Binary Exclusions
+node_modules/
+.expo/
+dist/
+web-build/
+build/
+.gradle/
+android/app/build/
+android/build/
+android/.gradle/
+android/.cxx/
+*.apk
+*.aab
+*.zip
+*.log
+.claude/

@@ -102,17 +102,6 @@ export default function UserProfileScreen() {
           <View style={[styles.vline, { backgroundColor: colors.border }]} />
           <Stat label="Following" value={counts.following} />
         </View>
-
-        {!mine ? (
-          <Button
-            label={following ? "Following" : "Follow"}
-            icon={following ? "user-check" : "user-plus"}
-            variant={following ? "secondary" : "primary"}
-            loading={followBusy}
-            onPress={follow}
-            style={{ marginTop: spacing.lg, alignSelf: "stretch" }}
-          />
-        ) : null}
       </View>
 
       <ThemedText variant="label" muted style={styles.postsLabel}>
@@ -134,6 +123,20 @@ export default function UserProfileScreen() {
           <EmptyState icon="camera" title="No posts yet" body="Nothing shared with the community so far." />
         }
       />
+
+      {/* Sticky Follow bar — always reachable, even while scrolling the posts. */}
+      {!mine ? (
+        <View style={[styles.followBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+          <Button
+            label={following ? "Following" : "Follow"}
+            icon={following ? "user-check" : "user-plus"}
+            variant={following ? "secondary" : "primary"}
+            loading={followBusy}
+            onPress={follow}
+            style={{ alignSelf: "stretch" }}
+          />
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -162,4 +165,10 @@ const styles = StyleSheet.create({
   },
   vline: { width: StyleSheet.hairlineWidth, height: 30 },
   postsLabel: { marginTop: spacing.md, marginBottom: spacing.sm },
+  followBar: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
 });
+

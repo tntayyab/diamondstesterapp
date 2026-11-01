@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Button, Card, EmptyState, Screen, ThemedText, AuthenticityBadge } from "@/components/ui";
+import { appImages } from "@/content/appImages";
 import { exportHistoryCsv } from "@/lib/export";
 import { getHistory, type ScanRecord } from "@/lib/storage";
 import { radius, spacing, useTheme } from "@/theme";
@@ -23,9 +24,10 @@ export default function HistoryScreen() {
       <Screen scroll>
         <EmptyState
           icon="clock"
+          image={appImages.emptyScan}
           title="No scans yet"
           body="Every identification you make is saved here on this device, available offline."
-          action={<Button label="Scan a gemstone" icon="camera" onPress={() => router.push("/(tabs)")} />}
+          action={<Button label="Scan a diamond" icon="camera" onPress={() => router.push("/(tabs)")} />}
         />
       </Screen>
     );
